@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Frosterie Stock">
+<meta name="theme-color" content="#0A1628">
+<title>Frosterie Stock</title>
+<link rel="manifest" id="manifest-placeholder">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --navy:#0A1628;--gold:#C9A84C;--white:#fff;--off:#F8F6F0;
+  --border:#E0DBCE;--text:#1A1A1A;--mid:#555;--light:#888;
+  --green:#3B7A1E;--green-bg:#EAF3DE;--amber:#8A5A0B;--amber-bg:#FAEEDA;
+  --red:#8A1F1F;--red-bg:#FCEBEB;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--off);color:var(--text);min-height:100vh;padding-bottom:100px;}
+header{background:var(--navy);padding:env(safe-area-inset-top,14px) 1.25rem 14px;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(201,168,76,0.3);}
+.brand{font-size:1.4rem;font-weight:600;color:var(--gold);letter-spacing:0.1em;}
+.sub{font-size:0.6rem;color:rgba(255,255,255,0.45);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;}
+.container{max-width:600px;margin:0 auto;padding:1rem;}
+.delivery-notice{background:var(--navy);border-radius:10px;padding:11px 14px;margin-bottom:1rem;display:flex;align-items:center;gap:10px;}
+.dn-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.dn-text{font-size:0.7rem;color:rgba(255,255,255,0.75);line-height:1.5;}
+.dn-text strong{color:var(--gold);}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.stat{background:white;border:1px solid var(--border);border-radius:10px;padding:11px 13px;}
+.stat-label{font-size:0.62rem;color:var(--light);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;}
+.stat-val{font-size:1.3rem;font-weight:600;color:var(--navy);}
+.stat-unit{font-size:0.62rem;color:var(--light);font-weight:400;}
+.sec-title{font-size:0.72rem;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.65rem;padding-bottom:0.35rem;border-bottom:1px solid var(--gold);}
+.products{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;}
+.card{background:white;border-radius:12px;overflow:hidden;border:1px solid var(--border);}
+.card-stripe{height:3px;}
+.card-stripe.ok{background:var(--green);}
+.card-stripe.warn{background:#EF9F27;}
+.card-stripe.low{background:#E24B4A;}
+.card-body{padding:11px 13px;}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.card-name{font-size:0.95rem;font-weight:600;color:var(--navy);}
+.card-meta{font-size:0.62rem;color:var(--light);margin-top:2px;}
+.badge{font-size:0.6rem;padding:3px 8px;border-radius:20px;font-weight:600;white-space:nowrap;}
+.badge.ok{background:var(--green-bg);color:var(--green);}
+.badge.warn{background:var(--amber-bg);color:var(--amber);}
+.badge.low{background:var(--red-bg);color:var(--red);}
+.card-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.cn{font-size:0.62rem;color:var(--light);}
+.cn strong{display:block;font-size:1rem;font-weight:600;color:var(--navy);}
+.prog{height:4px;background:var(--off);border-radius:2px;overflow:hidden;margin-bottom:10px;}
+.prog-fill{height:100%;border-radius:2px;transition:width 0.3s;}
+.card-btns{display:flex;border-top:1px solid var(--border);margin:0 -13px -11px;}
+.cbtn{flex:1;padding:11px 4px;font-size:0.68rem;font-weight:500;border:none;background:white;cursor:pointer;color:var(--navy);font-family:inherit;}
+.cbtn:not(:last-child){border-right:1px solid var(--border);}
+.cbtn:active{background:var(--off);}
+.cbtn.p{background:var(--navy);color:var(--gold);}
+.cbtn.p:active{background:#0d1e38;}
+.log-wrap{background:white;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:1rem;}
+.log-empty{text-align:center;color:var(--light);font-size:0.72rem;padding:0.75rem 0;font-style:italic;}
+.log-scroll{max-height:220px;overflow-y:auto;}
+.log-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);gap:6px;}
+.log-item:last-child{border-bottom:none;}
+.log-l{font-size:0.7rem;color:var(--text);flex:1;line-height:1.4;}
+.log-r{font-size:0.62rem;color:var(--light);text-align:right;white-space:nowrap;}
+.lt{display:inline-block;padding:2px 6px;border-radius:8px;font-size:0.58rem;font-weight:600;margin-right:4px;}
+.lt-in{background:var(--green-bg);color:var(--green);}
+.lt-out{background:var(--red-bg);color:var(--red);}
+.lt-adj{background:var(--amber-bg);color:var(--amber);}
+.fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 1.5rem);right:1.5rem;background:var(--navy);color:var(--gold);border:none;border-radius:50px;padding:13px 20px;font-size:0.78rem;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(10,22,40,0.35);z-index:40;font-family:inherit;}
+.fab:active{transform:scale(0.97);}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(10,22,40,0.6);z-index:200;align-items:flex-end;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:white;border-radius:20px 20px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,0px) + 20px);width:100%;max-width:480px;}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-size:1rem;font-weight:600;color:var(--navy);margin-bottom:14px;}
+.field{margin-bottom:11px;}
+.field label{display:block;font-size:0.62rem;color:var(--light);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+.field input,.field select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;font-size:0.9rem;color:var(--text);background:white;outline:none;font-family:inherit;-webkit-appearance:none;}
+.field input:focus,.field select:focus{border-color:var(--navy);}
+.mbtns{display:flex;gap:8px;margin-top:14px;}
+.mbtns button{flex:1;padding:12px;border-radius:10px;font-size:0.82rem;font-weight:600;cursor:pointer;border:1px solid var(--border);font-family:inherit;}
+.mbtns .mc{background:white;color:var(--mid);}
+.mbtns .mconf{background:var(--navy);color:var(--gold);border-color:var(--navy);}
+.mbtns button:active{transform:scale(0.98);}
+.install-banner{background:white;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:1rem;display:none;}
+.install-banner.show{display:block;}
+.ib-title{font-size:0.82rem;font-weight:600;color:var(--navy);margin-bottom:4px;}
+.ib-text{font-size:0.72rem;color:var(--mid);line-height:1.5;margin-bottom:10px;}
+.ib-btn{background:var(--navy);color:var(--gold);border:none;border-radius:8px;padding:9px 16px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:inherit;}
+.export-btn{width:100%;padding:12px;background:white;border:1px solid var(--border);border-radius:10px;font-size:0.75rem;color:var(--mid);cursor:pointer;font-family:inherit;margin-bottom:1rem;}
+.export-btn:active{background:var(--off);}
+footer{text-align:center;padding:1rem;font-size:0.58rem;color:var(--light);letter-spacing:0.1em;text-transform:uppercase;}
+footer span{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">FROSTERIE</div>
+  <div class="sub">Stock Tracker</div>
+</header>
+
+<div class="container">
+
+  <div class="install-banner" id="install-banner">
+    <div class="ib-title">Add to Home Screen</div>
+    <div class="ib-text">Install this tracker on your phone for instant access — works offline, no internet needed, data saves permanently.</div>
+    <button class="ib-btn" id="install-btn">Install App</button>
+  </div>
+
+  <div class="delivery-notice">
+    <div class="dn-dot"></div>
+    <div class="dn-text">
+      <strong>Tue &amp; Fri deliveries</strong><br>
+      Cutoff: Mon midnight (Tue) &nbsp;|&nbsp; Wed midnight (Fri)
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="sec-title">Croissant Stock</div>
+  <div class="products" id="products"></div>
+
+  <button class="export-btn" onclick="exportCSV()">Export activity log as CSV</button>
+
+  <div class="sec-title">Activity Log</div>
+  <div class="log-wrap">
+    <div class="log-scroll" id="log-list"><div class="log-empty">No activity yet. Start by restocking.</div></div>
+  </div>
+
+  <footer>&copy; 2025 <span>Frosterie</span> &mdash; Internal use only</footer>
+</div>
+
+<button class="fab" onclick="openModal('restock',null)">+ Restock</button>
+
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title">Update Stock</div>
+    <div class="field">
+      <label>Product</label>
+      <select id="m-product"></select>
+    </div>
+    <div class="field">
+      <label id="m-qty-label">Packs to add</label>
+      <input type="number" id="m-qty" min="0" inputmode="numeric" placeholder="0">
+    </div>
+    <div class="field">
+      <label>Note (optional)</label>
+      <input type="text" id="m-note" placeholder="e.g. Tuesday delivery">
+    </div>
+    <div class="mbtns">
+      <button class="mc" onclick="closeModal()">Cancel</button>
+      <button class="mconf" onclick="submitModal()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const KS = 'frosterie_stock_v2';
+const KL = 'frosterie_log_v2';
+
+const DEFS = [
+  {id:'mini',    name:'Mini 30g',    pack:'Pack of 25',price:15000,reorder:5, stock:0,sold:0},
+  {id:'midi',    name:'Midi 60g',    pack:'Pack of 8', price:12000,reorder:4, stock:0,sold:0},
+  {id:'maxi',    name:'Maxi 70g',    pack:'Pack of 6', price:12000,reorder:3, stock:0,sold:0},
+  {id:'classic', name:'Classic 80g', pack:'Pack of 4', price:12000,reorder:3, stock:0,sold:0},
+];
+
+function load(){try{const s=localStorage.getItem(KS);return s?JSON.parse(s):JSON.parse(JSON.stringify(DEFS));}catch(e){return JSON.parse(JSON.stringify(DEFS));}}
+function loadLog(){try{const l=localStorage.getItem(KL);return l?JSON.parse(l):[];}catch(e){return[];}}
+function save(){localStorage.setItem(KS,JSON.stringify(products));localStorage.setItem(KL,JSON.stringify(log));}
+
+let products=load(), log=loadLog(), modalMode=null;
+
+function st(p){if(p.stock<=0)return 'low';if(p.stock<=p.reorder)return 'warn';return 'ok';}
+function bt(p){const s=st(p);return s==='low'?'Out of stock':s==='warn'?'Low stock':'In stock';}
+function pc(p){const s=st(p);return s==='low'?'#E24B4A':s==='warn'?'#EF9F27':'#639922';}
+function pw(p){const m=Math.max(p.stock+p.sold,p.reorder*3,1);return Math.min(100,Math.round((p.stock/m)*100));}
+function tv(){return products.reduce((s,p)=>s+p.stock*p.price,0);}
+function tp(){return products.reduce((s,p)=>s+p.stock,0);}
+function lc(){return products.filter(p=>st(p)!=='ok').length;}
+function ts(){return products.reduce((s,p)=>s+p.sold,0);}
+
+function renderSummary(){
+  document.getElementById('summary').innerHTML=`
+    <div class="stat"><div class="stat-label">In stock</div><div class="stat-val">${tp()} <span class="stat-unit">packs</span></div></div>
+    <div class="stat"><div class="stat-label">Stock value</div><div class="stat-val">&#8358;${tv().toLocaleString()}</div></div>
+    <div class="stat"><div class="stat-label">Need attention</div><div class="stat-val" style="color:${lc()>0?'#E24B4A':'var(--navy)'}">${lc()} <span class="stat-unit">SKUs</span></div></div>
+    <div class="stat"><div class="stat-label">Packs sold</div><div class="stat-val">${ts()}</div></div>
+  `;
+}
+
+function renderProducts(){
+  document.getElementById('products').innerHTML=products.map(p=>{
+    const s=st(p);
+    return `
+      <div class="card">
+        <div class="card-stripe ${s}"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">${p.name}</div><div class="card-meta">${p.pack} &middot; &#8358;${p.price.toLocaleString()} &middot; Reorder at ${p.reorder}</div></div>
+            <span class="badge ${s}">${bt(p)}</span>
+          </div>
+          <div class="card-nums">
+            <div class="cn"><strong>${p.stock}</strong>In stock</div>
+            <div class="cn"><strong>${p.sold}</strong>Sold</div>
+            <div class="cn"><strong>&#8358;${(p.stock*p.price).toLocaleString()}</strong>Value</div>
+          </div>
+          <div class="prog"><div class="prog-fill" style="width:${pw(p)}%;background:${pc(p)};"></div></div>
+          <div class="card-btns">
+            <button class="cbtn p" onclick="openModal('restock','${p.id}')">+ Restock</button>
+            <button class="cbtn" onclick="openModal('sell','${p.id}')">Record Sale</button>
+            <button class="cbtn" onclick="openModal('adjust','${p.id}')">Adjust</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderLog(){
+  const el=document.getElementById('log-list');
+  if(!log.length){el.innerHTML='<div class="log-empty">No activity yet. Start by restocking.</div>';return;}
+  el.innerHTML=[...log].reverse().slice(0,100).map(e=>`
+    <div class="log-item">
+      <div class="log-l">
+        <span class="lt lt-${e.type==='Restock'?'in':e.type==='Sale'?'out':'adj'}">${e.type}</span>
+        ${e.product} &mdash; ${e.qty>0?'+':''}${e.qty} pack${Math.abs(e.qty)!==1?'s':''}
+        ${e.note?'<br><span style="color:var(--light);font-size:0.62rem">'+e.note+'</span>':''}
+      </div>
+      <div class="log-r">${e.time}</div>
+    </div>
+  `).join('');
+}
+
+function render(){renderSummary();renderProducts();renderLog();}
+
+function openModal(mode,pid){
+  modalMode=mode;
+  const sel=document.getElementById('m-product');
+  sel.innerHTML=products.map(p=>`<option value="${p.id}" ${p.id===pid?'selected':''}>${p.name}</option>`).join('');
+  document.getElementById('m-qty').value='';
+  document.getElementById('m-note').value='';
+  const titles={restock:'+ Restock Stock',sell:'Record a Sale',adjust:'Adjust Stock Count'};
+  const labels={restock:'Packs received',sell:'Packs sold',adjust:'New total (actual count)'};
+  document.getElementById('modal-title').textContent=titles[mode];
+  document.getElementById('m-qty-label').textContent=labels[mode];
+  document.getElementById('modal-bg').classList.add('open');
+  setTimeout(()=>document.getElementById('m-qty').focus(),200);
+}
+
+function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
+
+function submitModal(){
+  const pid=document.getElementById('m-product').value;
+  const qty=parseInt(document.getElementById('m-qty').value);
+  const note=document.getElementById('m-note').value.trim();
+  const p=products.find(x=>x.id===pid);
+  if(isNaN(qty)||qty<0){alert('Please enter a valid number.');return;}
+  const now=new Date();
+  const t=now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'})+' '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  if(modalMode==='restock'){
+    p.stock+=qty;
+    log.push({type:'Restock',product:p.name,qty,note,time:t});
+  } else if(modalMode==='sell'){
+    if(qty>p.stock){alert('Cannot sell more than current stock ('+p.stock+' packs).');return;}
+    p.stock-=qty;p.sold+=qty;
+    log.push({type:'Sale',product:p.name,qty:-qty,note,time:t});
+  } else {
+    const diff=qty-p.stock;
+    p.stock=qty;
+    log.push({type:'Adjust',product:p.name,qty:diff,note:note||'Manual count',time:t});
+  }
+  save();closeModal();render();
+}
+
+function exportCSV(){
+  if(!log.length){alert('No activity to export yet.');return;}
+  const rows=[['Date','Type','Product','Qty','Note'],...[...log].reverse().map(e=>[e.time,e.type,e.product,e.qty,e.note||''])];
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='frosterie_stock_log.csv';a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('modal-bg').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('install-banner').classList.add('show');
+});
+document.getElementById('install-btn').addEventListener('click',async()=>{
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    const{outcome}=await deferredPrompt.userChoice;
+    if(outcome==='accepted') document.getElementById('install-banner').classList.remove('show');
+    deferredPrompt=null;
+  }
+});
+
+render();
+</script>
+</body>
+</html>
