@@ -1,0 +1,2 @@
+# frosterie-stock
+Inventory tracker
