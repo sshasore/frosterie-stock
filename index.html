@@ -191,7 +191,7 @@ const KL = 'frosterie_v2_log';
 const PRODUCTS = [
   {
     id: 'mini', name: 'Mini 30g',
-    carton: { pieces: 240, costPrice: 96000, sellPrice: 168000 },
+    carton: { pieces: 480, costPrice: 96000, sellPrice: 168000 },
     bags: [
       { id:'mini_bag80', name:'Bag of 80', pieces:80, costPerPiece:400, sellPrice:47500 },
       { id:'mini_bag40', name:'Bag of 40', pieces:40, costPerPiece:400, sellPrice:24000 },
@@ -203,7 +203,7 @@ const PRODUCTS = [
   },
   {
     id: 'midi', name: 'Midi 60g',
-    carton: { pieces: 70, costPrice: 49000, sellPrice: 72000 },
+    carton: { pieces: 192, costPrice: 49000, sellPrice: 72000 },
     bags: [
       { id:'midi_bag35', name:'Bag of 35', pieces:35, costPerPiece:700, sellPrice:52000 },
     ],
@@ -214,7 +214,7 @@ const PRODUCTS = [
   },
   {
     id: 'maxi', name: 'Maxi 70g',
-    carton: { pieces: 60, costPrice: 60000, sellPrice: 80000 },
+    carton: { pieces: 120, costPrice: 60000, sellPrice: 80000 },
     bags: [
       { id:'maxi_bag30', name:'Bag of 30', pieces:30, costPerPiece:1000, sellPrice:53000 },
     ],
@@ -224,7 +224,7 @@ const PRODUCTS = [
   },
   {
     id: 'classic', name: 'Classic 80g',
-    carton: { pieces: 60, costPrice: 60000, sellPrice: 94000 },
+    carton: { pieces: 120, costPrice: 60000, sellPrice: 94000 },
     bags: [
       { id:'classic_bag30', name:'Bag of 30', pieces:30, costPerPiece:1000, sellPrice:65000 },
     ],
@@ -579,55 +579,121 @@ function submitSale() {
 function openConvert(pid) {
   const p = getProd(pid);
   const s = stock[pid];
-  const unitOptions = [...p.bags, ...p.packs].map(u => `<option value="${u.id}">${u.name} (${u.pieces} pcs each)</option>`).join('');
 
-  openModal('Convert Carton to Units',
-    `<div class="info-box">Converting breaks a carton into bags or packs. Stock is adjusted automatically.</div>
-     <div class="field"><label>Product</label><input type="text" value="${p.name}" disabled style="background:var(--off)"></div>
-     <div class="field"><label>Cartons available</label><input type="text" value="${s.cartons}" disabled style="background:var(--off)"></div>
-     <div class="field"><label>Cartons to convert</label><input type="number" id="m-cartons" min="1" max="${s.cartons}" inputmode="numeric" placeholder="0" oninput="updateConvertCalc('${pid}')"></div>
-     <div class="field"><label>Convert into</label><select id="m-unit" onchange="updateConvertCalc('${pid}')">${unitOptions}</select></div>
-     <div id="m-convert-info" class="info-box" style="display:none"></div>
-     <div class="field"><label>Note (optional)</label><input type="text" id="m-note" placeholder="e.g. Breaking for retail"></div>`,
+  // Build qty input row for every unit type
+  const unitRows = [...p.bags, ...p.packs].map(u => `
+    <div class="stock-row" style="padding:7px 0;border-bottom:1px solid var(--border);align-items:center;">
+      <div class="stock-info">
+        <div class="stock-name">${u.name}</div>
+        <div class="stock-detail">${u.pieces} pcs each</div>
+      </div>
+      <input type="number" min="0" inputmode="numeric" value="0"
+        id="conv_${u.id}"
+        oninput="updateConvertSummary('${pid}')"
+        style="width:70px;padding:7px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;text-align:center;font-family:inherit;">
+    </div>`).join('');
+
+  openModal('Convert Cartons to Units',
+    `<div class="info-box" style="margin-bottom:10px;">
+       Set how many of <strong>each unit type</strong> you want from the cartons.<br>
+       The tracker will calculate total pieces used and deduct cartons accordingly.
+     </div>
+     <div class="field">
+       <label>Cartons available: <strong>${s.cartons}</strong></label>
+       <label style="margin-top:8px">Cartons to convert</label>
+       <input type="number" id="m-cartons" min="1" max="${s.cartons}" inputmode="numeric"
+         placeholder="1" oninput="updateConvertSummary('${pid}')">
+     </div>
+     <div style="font-size:0.62rem;font-weight:700;color:var(--light);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">
+       Quantity of each unit obtained
+     </div>
+     ${unitRows}
+     <div id="conv-summary" class="info-box" style="display:none;margin-top:10px;"></div>
+     <div class="field" style="margin-top:10px;">
+       <label>Note (optional)</label>
+       <input type="text" id="m-note" placeholder="e.g. Breaking carton for retail">
+     </div>`,
     `<button style="flex:1;padding:12px;border-radius:10px;font-size:0.82rem;font-weight:700;cursor:pointer;border:1px solid var(--border);background:white;color:var(--mid);font-family:inherit" onclick="closeModal()">Cancel</button>
      <button style="flex:1;padding:12px;border-radius:10px;font-size:0.82rem;font-weight:700;cursor:pointer;border:none;background:var(--blue);color:white;font-family:inherit" onclick="submitConvert('${pid}')">Convert</button>`
   );
 }
 
-function updateConvertCalc(pid) {
+function updateConvertSummary(pid) {
   const p = getProd(pid);
   const cartons = parseInt(document.getElementById('m-cartons').value) || 0;
-  const uid_ = document.getElementById('m-unit').value;
-  const u = getUnit(pid, uid_);
-  const infoBox = document.getElementById('m-convert-info');
-  if (cartons > 0 && u) {
-    const totalPieces = cartons * p.carton.pieces;
-    const units = Math.floor(totalPieces / u.pieces);
-    const remainder = totalPieces % u.pieces;
-    infoBox.style.display = 'block';
-    infoBox.innerHTML = `${cartons} carton${cartons>1?'s':''} (${totalPieces} pcs) → <strong>${units} × ${u.name}</strong>${remainder>0?` + ${remainder} pieces remaining`:''}`;
-  } else {
-    infoBox.style.display = 'none';
+  const totalAvailPieces = cartons * p.carton.pieces;
+
+  let totalAllocated = 0;
+  const lines = [];
+  let hasAny = false;
+
+  [...p.bags, ...p.packs].forEach(u => {
+    const qty = parseInt(document.getElementById('conv_' + u.id).value) || 0;
+    if (qty > 0) {
+      const piecesUsed = qty * u.pieces;
+      totalAllocated += piecesUsed;
+      lines.push(qty + ' × ' + u.name + ' (' + piecesUsed + ' pcs)');
+      hasAny = true;
+    }
+  });
+
+  const summary = document.getElementById('conv-summary');
+  if (!hasAny && cartons === 0) { summary.style.display = 'none'; return; }
+
+  const remaining = totalAvailPieces - totalAllocated;
+  const cartonCost = cartons * p.carton.costPrice;
+  const isOver = remaining < 0;
+
+  summary.style.display = 'block';
+  summary.style.background = isOver ? 'var(--red-bg)' : 'var(--blue-bg)';
+  summary.style.color = isOver ? 'var(--red)' : 'var(--blue)';
+
+  let html = cartons > 0 ? '<strong>' + cartons + ' carton' + (cartons > 1 ? 's' : '') + ' = ' + totalAvailPieces + ' pieces</strong><br>' : '';
+  if (lines.length) html += lines.join('<br>') + '<br>';
+  if (cartons > 0) {
+    html += '<strong>Pieces used: ' + totalAllocated + ' / ' + totalAvailPieces + '</strong>';
+    if (remaining > 0) html += ' &nbsp;(' + remaining + ' pieces unallocated)';
+    if (isOver) html += ' &nbsp;⚠️ Over by ' + Math.abs(remaining) + ' pieces';
   }
+  summary.innerHTML = html;
 }
 
 function submitConvert(pid) {
   const p = getProd(pid);
-  const cartons = parseInt(document.getElementById('m-cartons').value);
-  const uid_ = document.getElementById('m-unit').value;
+  const cartons = parseInt(document.getElementById('m-cartons').value) || 0;
   const note = document.getElementById('m-note').value.trim();
-  if (!cartons || cartons < 1) { alert('Enter number of cartons to convert.'); return; }
-  if (stock[pid].cartons < cartons) { alert(`Only ${stock[pid].cartons} carton(s) available.`); return; }
 
-  const u = getUnit(pid, uid_);
-  const totalPieces = cartons * p.carton.pieces;
-  const units = Math.floor(totalPieces / u.pieces);
+  if (cartons < 1) { alert('Enter how many cartons to convert.'); return; }
+  if (stock[pid].cartons < cartons) { alert('Only ' + stock[pid].cartons + ' carton(s) available.'); return; }
 
+  const totalAvailPieces = cartons * p.carton.pieces;
+  let totalAllocated = 0;
+  const obtained = [];
+
+  [...p.bags, ...p.packs].forEach(u => {
+    const qty = parseInt(document.getElementById('conv_' + u.id).value) || 0;
+    if (qty > 0) {
+      totalAllocated += qty * u.pieces;
+      obtained.push({ uid: u.id, uname: u.name, qty });
+    }
+  });
+
+  if (obtained.length === 0) { alert('Enter at least one unit quantity to convert into.'); return; }
+  if (totalAllocated > totalAvailPieces) {
+    alert('You have allocated ' + totalAllocated + ' pieces but ' + cartons + ' carton(s) only contain ' + totalAvailPieces + ' pieces. Please reduce quantities.'); return;
+  }
+
+  // Apply stock changes
   stock[pid].cartons -= cartons;
-  stock[pid][uid_] = (stock[pid][uid_] || 0) + units;
+  obtained.forEach(o => {
+    stock[pid][o.uid] = (stock[pid][o.uid] || 0) + o.qty;
+  });
 
-  const desc = `${cartons} carton${cartons>1?'s':''} of ${p.name} → ${units} × ${u.name}`;
-  log.push({ id:uid(), type:'convert', pid, key:uid_, qty:units, pieces:totalPieces, desc, note, time:now() });
+  const descParts = obtained.map(o => o.qty + ' × ' + o.uname).join(', ');
+  const unallocated = totalAvailPieces - totalAllocated;
+  const desc = cartons + ' carton' + (cartons > 1 ? 's' : '') + ' of ' + p.name + ' → ' + descParts + (unallocated > 0 ? ' (' + unallocated + ' pcs unallocated)' : '');
+
+  log.push({ id: uid(), type: 'convert', pid, key: 'multi', qty: cartons, pieces: totalAllocated, desc, note, time: now() });
   save(); closeModal(); render();
 }
 
