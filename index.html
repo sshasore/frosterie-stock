@@ -201,15 +201,27 @@ const PRODUCTS = [
       { id:'mini_pack20', name:'Pack of 20', pieces:20, costPerPiece:400, sellPrice:12000 },
     ]
   },
-  {
-    id: 'midi', name: 'Midi 60g',
-    carton: { pieces: 70, costPrice: 49000, sellPrice: 72000 },
+ {
+    id: 'demi', name: 'Demi 50g',
+    carton: { pieces: 120, costPrice: 80000, sellPrice: 118000 },
     bags: [
-      { id:'midi_bag35', name:'Bag of 35', pieces:35, costPerPiece:700, sellPrice:52000 },
+      { id:'demi_bag30', name:'Bag of 30', pieces:30, costPerPiece:712.5, sellPrice:36000 },
+      { id:'demi_bag60', name:'Bag of 60', pieces:60, costPerPiece:712.5, sellPrice:70000 },
     ],
     packs: [
-      { id:'midi_pack8', name:'Pack of 8', pieces:8, costPerPiece:700, sellPrice:12000 },
-      { id:'midi_pack6', name:'Pack of 6', pieces:6, costPerPiece:700, sellPrice:9000 },
+      { id:'demi_pack10', name:'Pack of 10', pieces:10, costPerPiece:712.5, sellPrice:12000 },
+    ]
+  },
+
+  {
+    id: 'midi', name: 'Midi 60g',
+    carton: { pieces: 70, costPrice: 60000, sellPrice: 75000 },
+    bags: [
+      { id:'midi_bag35', name:'Bag of 35', pieces:35, costPerPiece:857, sellPrice:52000 },
+    ],
+    packs: [
+      { id:'midi_pack8', name:'Pack of 8', pieces:8, costPerPiece:857, sellPrice:12000 },
+      { id:'midi_pack6', name:'Pack of 6', pieces:6, costPerPiece:857, sellPrice:9000 },
     ]
   },
   {
@@ -230,6 +242,17 @@ const PRODUCTS = [
     ],
     packs: [
       { id:'classic_pack6', name:'Pack of 6', pieces:6, costPerPiece:1000, sellPrice:13000 },
+    ]
+  },
+ {
+    id: 'pac', name: 'Pain au chocolat 65g',
+    carton: { pieces: 90, costPrice: 85500, sellPrice: 117000 },
+    bags: [
+      { id:'pac_bag30', name:'Bag of 30', pieces:30, costPerPiece:950, sellPrice:43000 },
+      { id:'pac_bag45', name:'Bag of 45', pieces:45, costPerPiece:950, sellPrice:60000 },
+    ],
+    packs: [
+      { id:'pac_pack10', name:'Pack of 10', pieces:10, costPerPiece:950, sellPrice:15000 },
     ]
   }
 ];
