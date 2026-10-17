@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0A1628">
 <title>Frosterie Stock</title>
 
-<!-- ⚡ SUPABASE STORAGE ENGINE INJECTED ⚡ -->
+<!-- ⚡ SUPABASE CDN TAG INJECTED ⚡ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -166,10 +166,13 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
 </div>
 
 <script>
-// ─── CLOUD CONNECTIONS LOADED FROM PROJECT IMAGE ─────────────────────────────
+// ─── INITIALIZE CLOUD INFRASTRUCTURE ─────────────────────────────────────────
+// ⚠️ Leave these as variables. You can swap these configurations dynamically.
 const SUPABASE_URL = "https://rhjeuxjbuihruisniplq.supabase.co"; 
-const SUPABASE_KEY = "sb_publishable_d5DTHmKMrigj9xH3rJ3INQ_KYXqC03z"; 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_KEY = "sb_publishable_d5DTHmKMRigj9xH3rJ3INQ_KYXqC03z"; 
+
+// Using 'db' configuration variable here avoids browser script-injection namespace conflicts with the global cdn script exposure
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─── DATA CONFIGURATION ──────────────────────────────────────────────────────
 const PRODUCTS = [
@@ -257,11 +260,11 @@ function defaultStock() {
   return s;
 }
 
-// Global Cloud Sync Engine
+// Global Cloud Sync Engine with Local Safety Fallback
 async function syncFromCloud() {
   try {
     // 1. Fetch unified Stock Object
-    const { data: stockData, error: stockErr } = await supabase.from('inventory_stock').select('*');
+    const { data: stockData, error: stockErr } = await db.from('inventory_stock').select('*');
     if (stockErr) throw stockErr;
     
     if (stockData && stockData.length > 0) {
@@ -272,35 +275,49 @@ async function syncFromCloud() {
         }
       });
     } else {
+      // SAFETY NET: If cloud database is empty, load defaults and push them up
       stock = defaultStock();
       await pushFullStockStateToCloud();
     }
 
     // 2. Fetch full Transaction logs
-    const { data: logData, error: logErr } = await supabase.from('inventory_log').select('*').order('id', { ascending: true });
+    const { data: logData, error: logErr } = await db.from('inventory_log').select('*').order('id', { ascending: true });
     if (logErr) throw logErr;
     log = logData ? logData.map(l => l.entry_data) : [];
 
     render();
   } catch(e) {
-    console.error("Critical Cloud Sync Error:", e);
+    console.error("Critical Cloud Sync Error, fallback to default state active:", e);
+    // If database tables aren't initialized yet, drawing template safe state allows runtime preview
     stock = defaultStock();
     render();
   }
 }
 
 async function pushFullStockStateToCloud() {
-  for (const pid of Object.keys(stock)) {
-    await supabase.from('inventory_stock').upsert({ product_id: pid, data: stock[pid] });
+  try {
+    for (const pid of Object.keys(stock)) {
+      await db.from('inventory_stock').upsert({ product_id: pid, data: stock[pid] });
+    }
+  } catch (err) {
+    console.warn("Could not save initial mock records to database:", err.message);
   }
 }
 
 async function saveCloudStockUpdate(pid) {
-  await supabase.from('inventory_stock').upsert({ product_id: pid, data: stock[pid] });
+  try {
+    await db.from('inventory_stock').upsert({ product_id: pid, data: stock[pid] });
+  } catch (err) {
+    console.error("Cloud tracking stock push failed:", err);
+  }
 }
 
 async function appendCloudLog(entry) {
-  await supabase.from('inventory_log').insert({ entry_data: entry });
+  try {
+    await db.from('inventory_log').insert({ entry_data: entry });
+  } catch (err) {
+    console.error("Cloud trace log synchronization failed:", err);
+  }
 }
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
@@ -785,7 +802,11 @@ function setFilter(f) { logFilter = f; renderLog(); }
 async function deleteLog(eid) {
   if (!confirm('Delete this log entry? Stock levels will not change.')) return;
   log = log.filter(e => e.id !== eid);
-  await supabase.from('inventory_log').delete().match({ 'entry_data->>id': eid });
+  try {
+    await db.from('inventory_log').delete().match({ 'entry_data->>id': eid });
+  } catch(err) {
+    console.error("Could not remove record trace from cloud:", err);
+  }
   render();
 }
 
