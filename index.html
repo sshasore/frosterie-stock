@@ -8,10 +8,6 @@
 <meta name="apple-mobile-web-app-title" content="Frosterie Stock">
 <meta name="theme-color" content="#0A1628">
 <title>Frosterie Stock</title>
-
-<!-- ⚡ SUPABASE CDN TAG INJECTED ⚡ -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -24,12 +20,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-index:50;border-bottom:2px solid var(--gold);}
 .brand{font-size:1.3rem;font-weight:700;color:var(--gold);letter-spacing:0.12em;}
 .sub{font-size:0.58rem;color:rgba(255,255,255,0.4);letter-spacing:0.18em;text-transform:uppercase;margin-top:2px;}
+
 /* TABS */
 .tabs{display:flex;background:var(--navy);border-bottom:1px solid rgba(201,168,76,0.2);position:sticky;top:56px;z-index:49;}
 .tab{flex:1;padding:10px 4px;font-size:0.68rem;font-weight:600;color:rgba(255,255,255,0.45);border:none;background:none;cursor:pointer;letter-spacing:0.05em;border-bottom:2px solid transparent;transition:all 0.2s;}
 .tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
 .container{max-width:680px;margin:0 auto;padding:12px;}
 .page{display:none;}.page.active{display:block;}
+
 /* SUMMARY CARDS */
 .summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
 .stat{background:white;border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
@@ -38,6 +37,7 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
 .stat-sub{font-size:0.6rem;color:var(--light);}
 .profit-pos{color:var(--green);}
 .profit-neg{color:var(--red);}
+
 /* PRODUCT CARDS */
 .prod-card{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
 .prod-stripe{height:3px;}
@@ -51,6 +51,7 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
 .badge.ok{background:var(--green-bg);color:var(--green);}
 .badge.warn{background:var(--amber-bg);color:var(--amber);}
 .badge.low{background:var(--red-bg);color:var(--red);}
+
 /* STOCK SECTIONS */
 .stock-section{padding:8px 12px;border-bottom:1px solid var(--border);}
 .stock-section:last-child{border-bottom:none;}
@@ -59,6 +60,7 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
 .dot-carton{background:#0A1628;}
 .dot-bag{background:#C9A84C;}
 .dot-pack{background:#639922;}
+
 .stock-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;gap:8px;}
 .stock-info{flex:1;}
 .stock-name{font-size:0.78rem;font-weight:600;color:var(--navy);}
@@ -66,6 +68,7 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
 .stock-nums{display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .stock-qty{font-size:1rem;font-weight:700;color:var(--navy);min-width:28px;text-align:center;}
 .stock-profit{font-size:0.6rem;font-weight:600;}
+
 /* ACTION BUTTONS */
 .prod-actions{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:var(--off);border-top:1px solid var(--border);}
 .act-btn{font-size:0.65rem;font-weight:600;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:white;cursor:pointer;color:var(--navy);font-family:inherit;white-space:nowrap;}
@@ -73,6 +76,7 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
 .act-btn.convert{background:var(--blue-bg);color:var(--blue);border-color:#b0c4e8;}
 .act-btn.sell{background:var(--red-bg);color:var(--red);border-color:#f0c0c0;}
 .act-btn.edit{background:var(--amber-bg);color:var(--amber);border-color:#e8d0a0;}
+
 /* LOG PAGE */
 .log-filters{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px;}
 .filter-btn{font-size:0.65rem;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid var(--border);background:white;cursor:pointer;color:var(--mid);white-space:nowrap;font-family:inherit;}
@@ -92,12 +96,14 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
 .log-profit{font-size:0.65rem;font-weight:700;}
 .log-empty{text-align:center;color:var(--light);font-size:0.75rem;padding:2rem;font-style:italic;}
 .log-delete{position:absolute;right:10px;bottom:8px;font-size:0.6rem;color:var(--red);background:none;border:none;cursor:pointer;font-family:inherit;opacity:0.7;}
+
 /* PROFIT PAGE */
 .profit-card{background:white;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;}
 .profit-title{font-size:0.75rem;font-weight:700;color:var(--navy);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .profit-row{display:flex;justify-content:space-between;font-size:0.72rem;padding:3px 0;color:var(--mid);}
 .profit-row strong{color:var(--text);}
 .profit-total{display:flex;justify-content:space-between;font-size:0.82rem;font-weight:700;padding:8px 0 0;border-top:1px solid var(--border);margin-top:4px;}
+
 /* MODAL */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(10,22,40,0.6);z-index:200;align-items:flex-end;justify-content:center;}
 .modal-bg.open{display:flex;}
@@ -114,32 +120,39 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
 .btn-cancel{background:white;color:var(--mid);}
 .btn-confirm{background:var(--navy);color:var(--gold);border-color:var(--navy);}
 .btn-danger{background:var(--red-bg);color:var(--red);border-color:#f0c0c0;}
+
 /* FAB */
 .fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);right:16px;background:var(--navy);color:var(--gold);border:none;border-radius:50px;padding:12px 18px;font-size:0.75rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(10,22,40,0.3);z-index:40;font-family:inherit;}
+
 /* EXPORT */
 .export-btn{width:100%;padding:11px;background:white;border:1px solid var(--border);border-radius:10px;font-size:0.72rem;color:var(--mid);cursor:pointer;font-family:inherit;margin-bottom:10px;font-weight:600;}
+
 .sec-title{font-size:0.68rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--gold);}
 .empty-state{text-align:center;color:var(--light);font-size:0.75rem;padding:2rem;font-style:italic;}
 </style>
 </head>
 <body>
+
 <header>
   <div class="brand">FROSTERIE</div>
   <div class="sub">Inventory Tracker v2</div>
 </header>
+
 <div class="tabs">
   <button class="tab active" onclick="showPage('stock')">Stock</button>
   <button class="tab" onclick="showPage('log')">Log</button>
   <button class="tab" onclick="showPage('profit')">Profit</button>
 </div>
+
 <!-- STOCK PAGE -->
 <div class="page active" id="page-stock">
   <div class="container">
-    <div class="summary" id="summary">Loading dashboard cloud state...</div>
+    <div class="summary" id="summary"></div>
     <div class="sec-title">Croissant Inventory</div>
     <div id="products"></div>
   </div>
 </div>
+
 <!-- LOG PAGE -->
 <div class="page" id="page-log">
   <div class="container">
@@ -148,6 +161,8 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
     <div class="log-wrap" id="log-list"></div>
   </div>
 </div>
+
+<!-- PROFIT PAGE -->
 <div class="page" id="page-profit">
   <div class="container">
     <div class="summary" id="profit-summary"></div>
@@ -155,7 +170,10 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
     <div id="profit-breakdown"></div>
   </div>
 </div>
+
 <button class="fab" onclick="openRestock()">+ Restock</button>
+
+<!-- MODAL -->
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -166,15 +184,10 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
 </div>
 
 <script>
-// ─── INITIALIZE CLOUD INFRASTRUCTURE ─────────────────────────────────────────
-// ⚠️ Leave these as variables. You can swap these configurations dynamically.
-const SUPABASE_URL = "https://rhjeuxjbuihruisniplq.supabase.co"; 
-const SUPABASE_KEY = "sb_publishable_d5DTHmKMRigj9xH3rJ3INQ_KYXqC03z"; 
+// ─── DATA STRUCTURE ────────────────────────────────────────────────────────
+const KS = 'frosterie_v2_stock';
+const KL = 'frosterie_v2_log';
 
-// Using 'db' configuration variable here avoids browser script-injection namespace conflicts with the global cdn script exposure
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// ─── DATA CONFIGURATION ──────────────────────────────────────────────────────
 const PRODUCTS = [
   {
     id: 'mini', name: 'Mini 30g',
@@ -188,7 +201,7 @@ const PRODUCTS = [
       { id:'mini_pack20', name:'Pack of 20', pieces:20, costPerPiece:400, sellPrice:12000 },
     ]
   },
-  {
+ {
     id: 'demi', name: 'Demi 50g',
     carton: { pieces: 120, costPrice: 80000, sellPrice: 118000 },
     bags: [
@@ -199,6 +212,7 @@ const PRODUCTS = [
       { id:'demi_pack10', name:'Pack of 10', pieces:10, costPerPiece:712.5, sellPrice:12000 },
     ]
   },
+
   {
     id: 'midi', name: 'Midi 60g',
     carton: { pieces: 70, costPrice: 60000, sellPrice: 75000 },
@@ -230,7 +244,7 @@ const PRODUCTS = [
       { id:'classic_pack6', name:'Pack of 6', pieces:6, costPerPiece:1000, sellPrice:13000 },
     ]
   },
-  {
+ {
     id: 'pac', name: 'Pain au chocolat 65g',
     carton: { pieces: 90, costPrice: 85500, sellPrice: 117000 },
     bags: [
@@ -243,82 +257,36 @@ const PRODUCTS = [
   }
 ];
 
-// ─── STATE MANAGEMENT ────────────────────────────────────────────────────────
-let stock = {};
-let log = [];
-let logFilter = 'all';
-let currentPage = 'stock';
-
+// ─── STATE ──────────────────────────────────────────────────────────────────
 function defaultStock() {
   const s = {};
   PRODUCTS.forEach(p => {
     s[p.id] = { cartons: 0 };
     [...p.bags, ...p.packs].forEach(u => { s[p.id][u.id] = 0; });
   });
+  // Pre-load known stock
   s.midi['midi_pack6'] = 6;
   s.mini['mini_pack20'] = 2;
   return s;
 }
 
-// Global Cloud Sync Engine with Local Safety Fallback
-async function syncFromCloud() {
-  try {
-    // 1. Fetch unified Stock Object
-    const { data: stockData, error: stockErr } = await db.from('inventory_stock').select('*');
-    if (stockErr) throw stockErr;
-    
-    if (stockData && stockData.length > 0) {
-      stock = defaultStock();
-      stockData.forEach(row => {
-        if(stock[row.product_id]) {
-          stock[row.product_id] = row.data;
-        }
-      });
-    } else {
-      // SAFETY NET: If cloud database is empty, load defaults and push them up
-      stock = defaultStock();
-      await pushFullStockStateToCloud();
-    }
-
-    // 2. Fetch full Transaction logs
-    const { data: logData, error: logErr } = await db.from('inventory_log').select('*').order('id', { ascending: true });
-    if (logErr) throw logErr;
-    log = logData ? logData.map(l => l.entry_data) : [];
-
-    render();
-  } catch(e) {
-    console.error("Critical Cloud Sync Error, fallback to default state active:", e);
-    // If database tables aren't initialized yet, drawing template safe state allows runtime preview
-    stock = defaultStock();
-    render();
-  }
+function loadStock() {
+  try { const d = localStorage.getItem(KS); return d ? JSON.parse(d) : defaultStock(); }
+  catch(e) { return defaultStock(); }
+}
+function loadLog() {
+  try { const d = localStorage.getItem(KL); return d ? JSON.parse(d) : []; }
+  catch(e) { return []; }
+}
+function save() {
+  localStorage.setItem(KS, JSON.stringify(stock));
+  localStorage.setItem(KL, JSON.stringify(log));
 }
 
-async function pushFullStockStateToCloud() {
-  try {
-    for (const pid of Object.keys(stock)) {
-      await db.from('inventory_stock').upsert({ product_id: pid, data: stock[pid] });
-    }
-  } catch (err) {
-    console.warn("Could not save initial mock records to database:", err.message);
-  }
-}
-
-async function saveCloudStockUpdate(pid) {
-  try {
-    await db.from('inventory_stock').upsert({ product_id: pid, data: stock[pid] });
-  } catch (err) {
-    console.error("Cloud tracking stock push failed:", err);
-  }
-}
-
-async function appendCloudLog(entry) {
-  try {
-    await db.from('inventory_log').insert({ entry_data: entry });
-  } catch (err) {
-    console.error("Cloud trace log synchronization failed:", err);
-  }
-}
+let stock = loadStock();
+let log = loadLog();
+let logFilter = 'all';
+let currentPage = 'stock';
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 function fmt(n) { return '₦' + Number(n).toLocaleString(); }
@@ -328,23 +296,27 @@ function now() {
          d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 }
 function uid() { return Date.now() + Math.random().toString(36).slice(2,6); }
+
 function getProd(pid) { return PRODUCTS.find(p => p.id === pid); }
 function getUnit(pid, uid_) {
   const p = getProd(pid);
   return [...p.bags, ...p.packs].find(u => u.id === uid_);
 }
+
 function totalPieces(pid) {
-  const p = getProd(pid); const s = stock[pid] || {cartons:0};
-  let total = (s.cartons || 0) * p.carton.pieces;
+  const p = getProd(pid); const s = stock[pid];
+  let total = s.cartons * p.carton.pieces;
   [...p.bags, ...p.packs].forEach(u => { total += (s[u.id] || 0) * u.pieces; });
   return total;
 }
+
 function statusColor(pid) {
   const pieces = totalPieces(pid);
   if (pieces <= 0) return 'low';
   if (pieces < 50) return 'warn';
   return 'ok';
 }
+
 function badgeText(pid) {
   const s = statusColor(pid);
   if (s === 'low') return 'Out of stock';
@@ -357,6 +329,7 @@ function calcProfit() {
   let totalRevenue = 0, totalCost = 0, totalProfit = 0;
   const breakdown = {};
   PRODUCTS.forEach(p => { breakdown[p.id] = {revenue:0, cost:0, profit:0}; });
+
   log.forEach(e => {
     if (e.type !== 'sale') return;
     const b = breakdown[e.pid];
@@ -368,6 +341,7 @@ function calcProfit() {
     totalCost += e.cost || 0;
     totalProfit += (e.revenue || 0) - (e.cost || 0);
   });
+
   return { totalRevenue, totalCost, totalProfit, breakdown };
 }
 
@@ -376,6 +350,7 @@ function renderSummary() {
   const { totalRevenue, totalCost, totalProfit } = calcProfit();
   let totalPcs = 0;
   PRODUCTS.forEach(p => { totalPcs += totalPieces(p.id); });
+
   document.getElementById('summary').innerHTML = `
     <div class="stat"><div class="stat-label">Total pieces</div><div class="stat-val">${totalPcs}</div><div class="stat-sub">across all sizes</div></div>
     <div class="stat"><div class="stat-label">Total profit</div><div class="stat-val ${totalProfit >= 0 ? 'profit-pos' : 'profit-neg'}">${fmt(totalProfit)}</div><div class="stat-sub">from recorded sales</div></div>
@@ -383,13 +358,16 @@ function renderSummary() {
     <div class="stat"><div class="stat-label">Log entries</div><div class="stat-val">${log.length}</div><div class="stat-sub">total activities</div></div>
   `;
 }
+
 function renderProducts() {
   const el = document.getElementById('products');
   el.innerHTML = PRODUCTS.map(p => {
-    const s = stock[p.id] || {};
+    const s = stock[p.id];
     const sc = statusColor(p.id);
     const bt = badgeText(p.id);
     const pieces = totalPieces(p.id);
+
+    // Carton section
     let html = `
       <div class="prod-card">
         <div class="prod-stripe ${sc}"></div>
@@ -400,6 +378,7 @@ function renderProducts() {
           </div>
           <div style="font-size:0.65rem;color:var(--light);margin-top:2px">${pieces} total pieces in stock</div>
         </div>
+
         <div class="stock-section">
           <div class="section-label"><span class="dot dot-carton"></span>CARTONS</div>
           <div class="stock-row">
@@ -408,10 +387,11 @@ function renderProducts() {
               <div class="stock-detail">Cost ${fmt(p.carton.costPrice)} &middot; Sell ${fmt(p.carton.sellPrice)} &middot; Profit ${fmt(p.carton.sellPrice - p.carton.costPrice)}</div>
             </div>
             <div class="stock-nums">
-              <div class="stock-qty">${s.cartons || 0}</div>
+              <div class="stock-qty">${s.cartons}</div>
             </div>
           </div>
         </div>
+
         <div class="stock-section">
           <div class="section-label"><span class="dot dot-bag"></span>BAGS</div>
           ${p.bags.map(u => `
@@ -425,6 +405,7 @@ function renderProducts() {
             </div>
           </div>`).join('')}
         </div>
+
         <div class="stock-section">
           <div class="section-label"><span class="dot dot-pack"></span>PACKS</div>
           ${p.packs.map(u => `
@@ -438,6 +419,7 @@ function renderProducts() {
             </div>
           </div>`).join('')}
         </div>
+
         <div class="prod-actions">
           <button class="act-btn primary" onclick="openRestock('${p.id}')">+ Restock</button>
           <button class="act-btn sell" onclick="openSale('${p.id}')">Record Sale</button>
@@ -449,6 +431,7 @@ function renderProducts() {
     return html;
   }).join('');
 }
+
 function render() { renderSummary(); renderProducts(); renderProfitPage(); renderLog(); }
 
 // ─── MODAL HELPERS ──────────────────────────────────────────────────────────
@@ -479,27 +462,32 @@ function openRestock(pid) {
   );
   updateRestockUnits();
 }
+
 function updateRestockUnits() {
   const pid = document.getElementById('m-pid').value;
   const type = document.getElementById('m-type').value;
   const p = getProd(pid);
   const unitField = document.getElementById('m-unit-field');
   const unitSel = document.getElementById('m-unit');
+
   if (type === 'carton') { unitField.style.display = 'none'; return; }
   unitField.style.display = 'block';
   const units = type === 'bag' ? p.bags : p.packs;
   unitSel.innerHTML = units.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
 }
-async function submitRestock() {
+
+function submitRestock() {
   const pid = document.getElementById('m-pid').value;
   const type = document.getElementById('m-type').value;
   const qty = parseInt(document.getElementById('m-qty').value);
   const note = document.getElementById('m-note').value.trim();
   if (!qty || qty < 1) { alert('Enter a valid quantity.'); return; }
+
   const p = getProd(pid);
   let desc, key, pieces;
+
   if (type === 'carton') {
-    stock[pid].cartons = (stock[pid].cartons || 0) + qty;
+    stock[pid].cartons += qty;
     desc = `${qty} carton${qty>1?'s':''} of ${p.name}`;
     pieces = qty * p.carton.pieces;
     key = 'carton';
@@ -511,13 +499,9 @@ async function submitRestock() {
     pieces = qty * u.pieces;
     key = uid_;
   }
-  const logEntry = { id:uid(), type:'restock', pid, key, qty, pieces, desc, note, time:now() };
-  log.push(logEntry);
-  
-  await saveCloudStockUpdate(pid);
-  await appendCloudLog(logEntry);
-  
-  closeModal(); render();
+
+  log.push({ id:uid(), type:'restock', pid, key, qty, pieces, desc, note, time:now() });
+  save(); closeModal(); render();
 }
 
 // ─── SALE ───────────────────────────────────────────────────────────────────
@@ -539,6 +523,7 @@ function openSale(pid) {
   );
   updateSaleUnits();
 }
+
 function updateSaleUnits() {
   const pid = document.getElementById('m-pid').value;
   const type = document.getElementById('m-type').value;
@@ -551,12 +536,14 @@ function updateSaleUnits() {
   unitSel.innerHTML = units.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
   updateSalePrices();
 }
+
 function updateSalePrices() {
   const pid = document.getElementById('m-pid').value;
   const type = document.getElementById('m-type').value;
   const qty = parseInt(document.getElementById('m-qty').value) || 0;
   const p = getProd(pid);
   const infoBox = document.getElementById('m-price-info');
+
   let sellPrice, costPrice, pieces;
   if (type === 'carton') {
     sellPrice = p.carton.sellPrice; costPrice = p.carton.costPrice; pieces = p.carton.pieces;
@@ -566,6 +553,7 @@ function updateSalePrices() {
     const u = getUnit(pid, uid_);
     sellPrice = u.sellPrice; costPrice = u.costPerPiece * u.pieces; pieces = u.pieces;
   }
+
   if (qty > 0) {
     const totalSell = qty * sellPrice;
     const totalCost = qty * costPrice;
@@ -576,16 +564,19 @@ function updateSalePrices() {
     infoBox.style.display = 'none';
   }
 }
-async function submitSale() {
+
+function submitSale() {
   const pid = document.getElementById('m-pid').value;
   const type = document.getElementById('m-type').value;
   const qty = parseInt(document.getElementById('m-qty').value);
   const note = document.getElementById('m-note').value.trim();
   if (!qty || qty < 1) { alert('Enter a valid quantity.'); return; }
+
   const p = getProd(pid);
   let desc, key, sellPrice, costPrice, pieces, uid_;
+
   if (type === 'carton') {
-    if ((stock[pid].cartons || 0) < qty) { alert(`Only ${stock[pid].cartons || 0} carton(s) in stock.`); return; }
+    if (stock[pid].cartons < qty) { alert(`Only ${stock[pid].cartons} carton(s) in stock.`); return; }
     stock[pid].cartons -= qty;
     sellPrice = p.carton.sellPrice; costPrice = p.carton.costPrice; pieces = p.carton.pieces;
     desc = `${qty} carton${qty>1?'s':''} of ${p.name}`;
@@ -600,21 +591,19 @@ async function submitSale() {
     desc = `${qty} × ${u.name} of ${p.name}`;
     key = uid_;
   }
+
   const revenue = qty * sellPrice;
   const cost = qty * costPrice;
-  const logEntry = { id:uid(), type:'sale', pid, key, qty, pieces:qty*pieces, desc, note, revenue, cost, time:now() };
-  log.push(logEntry);
-  
-  await saveCloudStockUpdate(pid);
-  await appendCloudLog(logEntry);
-  
-  closeModal(); render();
+  log.push({ id:uid(), type:'sale', pid, key, qty, pieces:qty*pieces, desc, note, revenue, cost, time:now() });
+  save(); closeModal(); render();
 }
 
 // ─── CONVERT ────────────────────────────────────────────────────────────────
 function openConvert(pid) {
   const p = getProd(pid);
-  const s = stock[pid] || {cartons:0};
+  const s = stock[pid];
+
+  // Build qty input row for every unit type
   const unitRows = [...p.bags, ...p.packs].map(u => `
     <div class="stock-row" style="padding:7px 0;border-bottom:1px solid var(--border);align-items:center;">
       <div class="stock-info">
@@ -626,15 +615,16 @@ function openConvert(pid) {
         oninput="updateConvertSummary('${pid}')"
         style="width:70px;padding:7px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;text-align:center;font-family:inherit;">
     </div>`).join('');
+
   openModal('Convert Cartons to Units',
     `<div class="info-box" style="margin-bottom:10px;">
        Set how many of <strong>each unit type</strong> you want from the cartons.<br>
        The tracker will calculate total pieces used and deduct cartons accordingly.
      </div>
      <div class="field">
-       <label>Cartons available: <strong>${s.cartons || 0}</strong></label>
+       <label>Cartons available: <strong>${s.cartons}</strong></label>
        <label style="margin-top:8px">Cartons to convert</label>
-       <input type="number" id="m-cartons" min="1" max="${s.cartons || 0}" inputmode="numeric"
+       <input type="number" id="m-cartons" min="1" max="${s.cartons}" inputmode="numeric"
          placeholder="1" oninput="updateConvertSummary('${pid}')">
      </div>
      <div style="font-size:0.62rem;font-weight:700;color:var(--light);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">
@@ -650,13 +640,16 @@ function openConvert(pid) {
      <button style="flex:1;padding:12px;border-radius:10px;font-size:0.82rem;font-weight:700;cursor:pointer;border:none;background:var(--blue);color:white;font-family:inherit" onclick="submitConvert('${pid}')">Convert</button>`
   );
 }
+
 function updateConvertSummary(pid) {
   const p = getProd(pid);
   const cartons = parseInt(document.getElementById('m-cartons').value) || 0;
   const totalAvailPieces = cartons * p.carton.pieces;
+
   let totalAllocated = 0;
   const lines = [];
   let hasAny = false;
+
   [...p.bags, ...p.packs].forEach(u => {
     const qty = parseInt(document.getElementById('conv_' + u.id).value) || 0;
     if (qty > 0) {
@@ -666,13 +659,18 @@ function updateConvertSummary(pid) {
       hasAny = true;
     }
   });
+
   const summary = document.getElementById('conv-summary');
   if (!hasAny && cartons === 0) { summary.style.display = 'none'; return; }
+
   const remaining = totalAvailPieces - totalAllocated;
+  const cartonCost = cartons * p.carton.costPrice;
   const isOver = remaining < 0;
+
   summary.style.display = 'block';
   summary.style.background = isOver ? 'var(--red-bg)' : 'var(--blue-bg)';
   summary.style.color = isOver ? 'var(--red)' : 'var(--blue)';
+
   let html = cartons > 0 ? '<strong>' + cartons + ' carton' + (cartons > 1 ? 's' : '') + ' = ' + totalAvailPieces + ' pieces</strong><br>' : '';
   if (lines.length) html += lines.join('<br>') + '<br>';
   if (cartons > 0) {
@@ -682,15 +680,19 @@ function updateConvertSummary(pid) {
   }
   summary.innerHTML = html;
 }
-async function submitConvert(pid) {
+
+function submitConvert(pid) {
   const p = getProd(pid);
   const cartons = parseInt(document.getElementById('m-cartons').value) || 0;
   const note = document.getElementById('m-note').value.trim();
+
   if (cartons < 1) { alert('Enter how many cartons to convert.'); return; }
-  if ((stock[pid].cartons || 0) < cartons) { alert('Only ' + (stock[pid].cartons || 0) + ' carton(s) available.'); return; }
+  if (stock[pid].cartons < cartons) { alert('Only ' + stock[pid].cartons + ' carton(s) available.'); return; }
+
   const totalAvailPieces = cartons * p.carton.pieces;
   let totalAllocated = 0;
   const obtained = [];
+
   [...p.bags, ...p.packs].forEach(u => {
     const qty = parseInt(document.getElementById('conv_' + u.id).value) || 0;
     if (qty > 0) {
@@ -698,34 +700,34 @@ async function submitConvert(pid) {
       obtained.push({ uid: u.id, uname: u.name, qty });
     }
   });
+
   if (obtained.length === 0) { alert('Enter at least one unit quantity to convert into.'); return; }
   if (totalAllocated > totalAvailPieces) {
     alert('You have allocated ' + totalAllocated + ' pieces but ' + cartons + ' carton(s) only contain ' + totalAvailPieces + ' pieces. Please reduce quantities.'); return;
   }
+
+  // Apply stock changes
   stock[pid].cartons -= cartons;
   obtained.forEach(o => {
     stock[pid][o.uid] = (stock[pid][o.uid] || 0) + o.qty;
   });
+
   const descParts = obtained.map(o => o.qty + ' × ' + o.uname).join(', ');
   const unallocated = totalAvailPieces - totalAllocated;
   const desc = cartons + ' carton' + (cartons > 1 ? 's' : '') + ' of ' + p.name + ' → ' + descParts + (unallocated > 0 ? ' (' + unallocated + ' pcs unallocated)' : '');
-  const logEntry = { id: uid(), type: 'convert', pid, key: 'multi', qty: cartons, pieces: totalAllocated, desc, note, time: now() };
-  log.push(logEntry);
-  
-  await saveCloudStockUpdate(pid);
-  await appendCloudLog(logEntry);
-  
-  closeModal(); render();
+
+  log.push({ id: uid(), type: 'convert', pid, key: 'multi', qty: cartons, pieces: totalAllocated, desc, note, time: now() });
+  save(); closeModal(); render();
 }
 
 // ─── EDIT ───────────────────────────────────────────────────────────────────
 function openEdit(pid) {
   const p = getProd(pid);
-  const s = stock[pid] || {};
+  const s = stock[pid];
   const rows = [
     `<div class="stock-row" style="padding:6px 0;border-bottom:1px solid var(--border)">
        <div class="stock-info"><div class="stock-name">Cartons</div></div>
-       <input type="number" min="0" inputmode="numeric" value="${s.cartons || 0}" id="edit_carton" style="width:70px;padding:6px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;text-align:center;font-family:inherit">
+       <input type="number" min="0" inputmode="numeric" value="${s.cartons}" id="edit_carton" style="width:70px;padding:6px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;text-align:center;font-family:inherit">
      </div>`,
     ...[...p.bags, ...p.packs].map(u =>
       `<div class="stock-row" style="padding:6px 0;border-bottom:1px solid var(--border)">
@@ -734,6 +736,7 @@ function openEdit(pid) {
        </div>`
     )
   ].join('');
+
   openModal(`Edit Stock — ${p.name}`,
     `<div class="info-box">Set the correct stock numbers. Each change is logged.</div>${rows}
      <div class="field" style="margin-top:10px"><label>Reason for edit</label><input type="text" id="m-note" placeholder="e.g. Stock count correction"></div>`,
@@ -741,15 +744,18 @@ function openEdit(pid) {
      <button style="flex:1;padding:12px;border-radius:10px;font-size:0.82rem;font-weight:700;cursor:pointer;border:none;background:var(--amber);color:white;font-family:inherit" onclick="submitEdit('${pid}')">Save Changes</button>`
   );
 }
-async function submitEdit(pid) {
+
+function submitEdit(pid) {
   const p = getProd(pid);
   const note = document.getElementById('m-note').value.trim() || 'Manual edit';
   const changes = [];
+
   const newCartons = parseInt(document.getElementById('edit_carton').value) || 0;
-  if (newCartons !== (stock[pid].cartons || 0)) {
-    changes.push(`Cartons: ${stock[pid].cartons || 0} → ${newCartons}`);
+  if (newCartons !== stock[pid].cartons) {
+    changes.push(`Cartons: ${stock[pid].cartons} → ${newCartons}`);
     stock[pid].cartons = newCartons;
   }
+
   [...p.bags, ...p.packs].forEach(u => {
     const el = document.getElementById(`edit_${u.id}`);
     if (!el) return;
@@ -760,14 +766,12 @@ async function submitEdit(pid) {
       stock[pid][u.id] = newVal;
     }
   });
+
   if (changes.length === 0) { closeModal(); return; }
-  const logEntry = { id:uid(), type:'adjust', pid, key:'edit', qty:0, pieces:0, desc:`Edit ${p.name}: ${changes.join(', ')}`, note, time:now() };
-  log.push(logEntry);
-  
-  await saveCloudStockUpdate(pid);
-  await appendCloudLog(logEntry);
-  
-  closeModal(); render();
+
+  log.push({ id:uid(), type:'adjust', pid, key:'edit', qty:0, pieces:0,
+    desc:`Edit ${p.name}: ${changes.join(', ')}`, note, time:now() });
+  save(); closeModal(); render();
 }
 
 // ─── LOG ────────────────────────────────────────────────────────────────────
@@ -776,10 +780,13 @@ function renderLog() {
   document.getElementById('log-filters').innerHTML = filters.map(f =>
     `<button class="filter-btn ${logFilter===f?'active':''}" onclick="setFilter('${f}')">${f.charAt(0).toUpperCase()+f.slice(1)}</button>`
   ).join('');
+
   const filtered = logFilter === 'all' ? [...log].reverse() : [...log].filter(e=>e.type===logFilter).reverse();
   const el = document.getElementById('log-list');
   if (!filtered.length) { el.innerHTML = `<div class="log-empty">No ${logFilter==='all'?'':logFilter+' '}entries yet.</div>`; return; }
+
   const typeClass = { restock:'lt-restock', sale:'lt-sale', convert:'lt-convert', adjust:'lt-adjust' };
+
   el.innerHTML = filtered.map(e => {
     const profitStr = e.type==='sale' ? `<span class="log-profit" style="color:${(e.revenue-e.cost)>=0?'var(--green)':'var(--red)'}">+${fmt(e.revenue-e.cost)}</span>` : '';
     return `<div class="log-item">
@@ -798,29 +805,28 @@ function renderLog() {
     </div>`;
   }).join('');
 }
+
 function setFilter(f) { logFilter = f; renderLog(); }
-async function deleteLog(eid) {
+
+function deleteLog(eid) {
   if (!confirm('Delete this log entry? Stock levels will not change.')) return;
   log = log.filter(e => e.id !== eid);
-  try {
-    await db.from('inventory_log').delete().match({ 'entry_data->>id': eid });
-  } catch(err) {
-    console.error("Could not remove record trace from cloud:", err);
-  }
-  render();
+  save(); render();
 }
 
 // ─── PROFIT PAGE ────────────────────────────────────────────────────────────
 function renderProfitPage() {
   const { totalRevenue, totalCost, totalProfit, breakdown } = calcProfit();
+
   document.getElementById('profit-summary').innerHTML = `
     <div class="stat"><div class="stat-label">Total revenue</div><div class="stat-val">${fmt(totalRevenue)}</div></div>
     <div class="stat"><div class="stat-label">Total cost</div><div class="stat-val">${fmt(totalCost)}</div></div>
     <div class="stat"><div class="stat-label">Gross profit</div><div class="stat-val ${totalProfit>=0?'profit-pos':'profit-neg'}">${fmt(totalProfit)}</div></div>
     <div class="stat"><div class="stat-label">Margin</div><div class="stat-val">${totalRevenue>0?Math.round((totalProfit/totalRevenue)*100):0}%</div></div>
   `;
+
   document.getElementById('profit-breakdown').innerHTML = PRODUCTS.map(p => {
-    const b = breakdown[p.id] || {revenue:0, cost:0, profit:0};
+    const b = breakdown[p.id];
     return `<div class="profit-card">
       <div class="profit-title">${p.name}</div>
       <div class="profit-row"><span>Revenue</span><strong>${fmt(b.revenue)}</strong></div>
@@ -835,8 +841,7 @@ function exportCSV() {
   if (!log.length) { alert('No activity to export yet.'); return; }
   const rows = [['Date','Type','Product','Description','Qty','Revenue','Cost','Profit','Note'],
     ...[...log].reverse().map(e => [e.time,e.type,e.pid||'',e.desc||'',e.qty||0,e.revenue||0,e.cost||0,(e.revenue||0)-(e.cost||0),e.note||''])];
-  const csv = rows.map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('
-');
+  const csv = rows.map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob = new Blob([csv], {type:'text/csv'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob); a.download = 'frosterie_log.csv'; a.click();
@@ -855,8 +860,8 @@ function showPage(name) {
   if (name==='profit') renderProfitPage();
 }
 
-// ─── INITIALIZATION BOOTSTRAP ───────────────────────────────────────────────
-syncFromCloud();
+// ─── INIT ────────────────────────────────────────────────────────────────────
+render();
 </script>
 </body>
 </html>
