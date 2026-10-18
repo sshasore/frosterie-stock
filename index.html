@@ -17,9 +17,17 @@
   --red:#7A1F1F;--red-bg:#FDEAEA;--blue:#1A3A6B;--blue-bg:#E2EAF8;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--off);color:var(--text);min-height:100vh;padding-bottom:120px;}
-header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-index:50;border-bottom:2px solid var(--gold);}
+header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-index:50;border-bottom:2px solid var(--gold);display:flex;justify-content:space-between;align-items:center;}
 .brand{font-size:1.3rem;font-weight:700;color:var(--gold);letter-spacing:0.12em;}
 .sub{font-size:0.58rem;color:rgba(255,255,255,0.4);letter-spacing:0.18em;text-transform:uppercase;margin-top:2px;}
+.signout{background:none;border:1px solid rgba(201,168,76,0.4);color:var(--gold);font-size:0.6rem;padding:5px 9px;border-radius:8px;cursor:pointer;font-family:inherit;}
+
+/* AUTH */
+#auth{display:none;position:fixed;inset:0;background:var(--navy);z-index:300;align-items:center;justify-content:center;padding:20px;}
+#auth.open{display:flex;}
+.auth-card{background:white;border-radius:16px;padding:22px;width:100%;max-width:340px;}
+.auth-card .brand{color:var(--navy);}
+.auth-card .sub{color:var(--light);margin-bottom:16px;}
 
 /* TABS */
 .tabs{display:flex;background:var(--navy);border-bottom:1px solid rgba(201,168,76,0.2);position:sticky;top:56px;z-index:49;}
@@ -134,8 +142,11 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
 <body>
 
 <header>
-  <div class="brand">FROSTERIE</div>
-  <div class="sub">Inventory Tracker v2</div>
+  <div>
+    <div class="brand">FROSTERIE</div>
+    <div class="sub">Inventory Tracker v2</div>
+  </div>
+  <button class="signout" onclick="signOut()">Sign out</button>
 </header>
 
 <div class="tabs">
@@ -183,11 +194,30 @@ header{background:var(--navy);padding:14px 16px 12px;position:sticky;top:0;z-ind
   </div>
 </div>
 
+<!-- SIGN IN -->
+<div id="auth">
+  <div class="auth-card">
+    <div class="brand">FROSTERIE</div>
+    <div class="sub">Sign in to continue</div>
+    <div class="field"><label>Email</label><input type="email" id="a-email" autocomplete="username"></div>
+    <div class="field"><label>Password</label><input type="password" id="a-pass" autocomplete="current-password"></div>
+    <div id="a-err" style="color:var(--red);font-size:0.7rem;margin-bottom:8px"></div>
+    <button class="btn-confirm" style="width:100%;padding:12px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;border:none;font-family:inherit" onclick="signIn()">Sign in</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-// ─── DATA STRUCTURE ────────────────────────────────────────────────────────
+// ─── SUPABASE CONFIG ────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://rhjeuxjbuihruisniplq.supabase.co/rest/v1/';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoamV1eGpidWlocnVpc25pcGxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIyNjQ5NDQsImV4cCI6MjEwNzg0MDk0NH0.oiSytPymuqwf1Pyt2uVi5v8iJID72KigyaHLoCJztb8';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// old localStorage keys, used only for the one-time import
 const KS = 'frosterie_v2_stock';
 const KL = 'frosterie_v2_log';
 
+// ─── DATA STRUCTURE ────────────────────────────────────────────────────────
 const PRODUCTS = [
   {
     id: 'mini', name: 'Mini 30g',
@@ -264,29 +294,148 @@ function defaultStock() {
     s[p.id] = { cartons: 0 };
     [...p.bags, ...p.packs].forEach(u => { s[p.id][u.id] = 0; });
   });
-  // Pre-load known stock
-  s.midi['midi_pack6'] = 6;
-  s.mini['mini_pack20'] = 2;
   return s;
 }
 
-function loadStock() {
-  try { const d = localStorage.getItem(KS); return d ? JSON.parse(d) : defaultStock(); }
-  catch(e) { return defaultStock(); }
-}
-function loadLog() {
-  try { const d = localStorage.getItem(KL); return d ? JSON.parse(d) : []; }
-  catch(e) { return []; }
-}
-function save() {
-  localStorage.setItem(KS, JSON.stringify(stock));
-  localStorage.setItem(KL, JSON.stringify(log));
-}
-
-let stock = loadStock();
-let log = loadLog();
+let stock = defaultStock();
+let log = [];
+let snap = {};            // last synced stock, flat: "pid|key" -> qty
+let snapIds = new Set();  // last synced log ids
 let logFilter = 'all';
 let currentPage = 'stock';
+
+// ─── SUPABASE SYNC ──────────────────────────────────────────────────────────
+function flatStock(s) {
+  const o = {};
+  for (const p in s) for (const k in s[p]) o[p + '|' + k] = s[p][k];
+  return o;
+}
+
+function toRow(e) {
+  return {
+    id: String(e.id), type: e.type, pid: e.pid, unit_key: e.key,
+    qty: e.qty || 0, pieces: e.pieces || 0, description: e.desc,
+    note: e.note || '', revenue: e.revenue || 0, cost: e.cost || 0, time_label: e.time
+  };
+}
+
+function fromRow(r) {
+  return {
+    id: r.id, type: r.type, pid: r.pid, key: r.unit_key, qty: r.qty, pieces: r.pieces,
+    desc: r.description, note: r.note || '', revenue: Number(r.revenue) || 0,
+    cost: Number(r.cost) || 0, time: r.time_label || ''
+  };
+}
+
+async function fetchAllLog() {
+  let all = [], from = 0;
+  const step = 1000;
+  while (true) {
+    const { data, error } = await db.from('activity_log').select('*')
+      .order('created_at', { ascending: true }).range(from, from + step - 1);
+    if (error) throw error;
+    all = all.concat(data);
+    if (data.length < step) break;
+    from += step;
+  }
+  return all;
+}
+
+async function loadAll() {
+  try {
+    const [sr, lr] = await Promise.all([
+      db.from('stock').select('*'),
+      fetchAllLog()
+    ]);
+    if (sr.error) throw sr.error;
+    const s = defaultStock();
+    sr.data.forEach(r => { if (s[r.pid]) s[r.pid][r.unit_key] = r.qty; });
+    stock = s;
+    log = lr.map(fromRow);
+    snap = flatStock(stock);
+    snapIds = new Set(log.map(e => e.id));
+    render();
+  } catch (e) {
+    alert('Could not load data: ' + (e.message || e));
+  }
+}
+
+// called after every change. Sends only the difference since the last sync.
+async function save() {
+  const cur = flatStock(stock);
+  const deltas = [];
+  for (const k in cur) {
+    const d = cur[k] - (snap[k] || 0);
+    if (d) { const [pid, key] = k.split('|'); deltas.push({ pid, key, delta: d }); }
+  }
+  const ids = new Set(log.map(e => e.id));
+  const logs = log.filter(e => !snapIds.has(e.id)).map(toRow);
+  const del = [...snapIds].filter(id => !ids.has(id));
+  if (!deltas.length && !logs.length && !del.length) return;
+  snap = cur; snapIds = ids;
+  try {
+    const { error } = await db.rpc('apply_change', { p_deltas: deltas, p_logs: logs, p_delete: del });
+    if (error) throw error;
+  } catch (e) {
+    alert('Save failed: ' + (e.message || e));
+    await loadAll();
+  }
+}
+
+// ─── AUTH ───────────────────────────────────────────────────────────────────
+function showAuth() { document.getElementById('auth').classList.add('open'); }
+
+async function signIn() {
+  const email = document.getElementById('a-email').value.trim();
+  const password = document.getElementById('a-pass').value;
+  const { error } = await db.auth.signInWithPassword({ email, password });
+  if (error) { document.getElementById('a-err').textContent = error.message; return; }
+  document.getElementById('a-err').textContent = '';
+  await onSignedIn();
+}
+
+async function signOut() {
+  await db.auth.signOut();
+  stock = defaultStock(); log = []; snap = {}; snapIds = new Set();
+  render(); showAuth();
+}
+
+let subscribed = false;
+let reloadTimer;
+function scheduleReload() { clearTimeout(reloadTimer); reloadTimer = setTimeout(loadAll, 500); }
+
+async function onSignedIn() {
+  document.getElementById('auth').classList.remove('open');
+  await loadAll();
+  await maybeImportLocal();
+  if (!subscribed) {
+    subscribed = true;
+    db.channel('frosterie')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'stock' }, scheduleReload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'activity_log' }, scheduleReload)
+      .subscribe();
+  }
+}
+
+// one-time move of data saved on this device into Supabase
+async function maybeImportLocal() {
+  const ls = localStorage.getItem(KS), ll = localStorage.getItem(KL);
+  if ((!ls && !ll) || log.length || Object.values(snap).some(v => v > 0)) return;
+  if (!confirm('Import the data saved on this device into the database?')) return;
+  try {
+    const s = ls ? JSON.parse(ls) : {};
+    const l = ll ? JSON.parse(ll) : [];
+    const rows = [];
+    for (const p in s) for (const k in s[p]) if (s[p][k] > 0) rows.push({ pid: p, unit_key: k, qty: s[p][k] });
+    if (rows.length) { const { error } = await db.from('stock').upsert(rows); if (error) throw error; }
+    const base = Date.now() - l.length * 1000;
+    const lr = l.map((e, i) => ({ ...toRow(e), created_at: new Date(base + i * 1000).toISOString() }));
+    if (lr.length) { const { error } = await db.from('activity_log').insert(lr); if (error) throw error; }
+    await loadAll();
+  } catch (e) {
+    alert('Import failed: ' + (e.message || e));
+  }
+}
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 function fmt(n) { return '₦' + Number(n).toLocaleString(); }
@@ -367,7 +516,6 @@ function renderProducts() {
     const bt = badgeText(p.id);
     const pieces = totalPieces(p.id);
 
-    // Carton section
     let html = `
       <div class="prod-card">
         <div class="prod-stripe ${sc}"></div>
@@ -603,7 +751,6 @@ function openConvert(pid) {
   const p = getProd(pid);
   const s = stock[pid];
 
-  // Build qty input row for every unit type
   const unitRows = [...p.bags, ...p.packs].map(u => `
     <div class="stock-row" style="padding:7px 0;border-bottom:1px solid var(--border);align-items:center;">
       <div class="stock-info">
@@ -664,7 +811,6 @@ function updateConvertSummary(pid) {
   if (!hasAny && cartons === 0) { summary.style.display = 'none'; return; }
 
   const remaining = totalAvailPieces - totalAllocated;
-  const cartonCost = cartons * p.carton.costPrice;
   const isOver = remaining < 0;
 
   summary.style.display = 'block';
@@ -706,7 +852,6 @@ function submitConvert(pid) {
     alert('You have allocated ' + totalAllocated + ' pieces but ' + cartons + ' carton(s) only contain ' + totalAvailPieces + ' pieces. Please reduce quantities.'); return;
   }
 
-  // Apply stock changes
   stock[pid].cartons -= cartons;
   obtained.forEach(o => {
     stock[pid][o.uid] = (stock[pid][o.uid] || 0) + o.qty;
@@ -861,7 +1006,12 @@ function showPage(name) {
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
-render();
+async function init() {
+  render();
+  const { data } = await db.auth.getSession();
+  if (data.session) await onSignedIn(); else showAuth();
+}
+init();
 </script>
 </body>
 </html>
